@@ -1,0 +1,9 @@
+Package: com.nguyenvinnh.chessassistant
+Name: ChessAssistant
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: AI Chess Assistant & Best Move Overlay for Chess.com
+Maintainer: Nguyen Vinh
+Author: Nguyen Vinh
+Section: Tweaks
+Depends: mobilesubstrate (>= 0.9.5000)
