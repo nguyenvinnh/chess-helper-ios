@@ -5,11 +5,6 @@ Dự án can thiệp trực tiếp vào Objective-C runtime của Chess.com đ�
 fenForCurrentPosition:flipped:
 
 ```
-### Nhận diện màu quân (Trắng / Đen)
-
-- **Hook `CHBoardView` (`Tweak.xm`):** Hook `setFlipped:`, `setAllowUserToMakeBlackMoves:` và các method thiết lập ván cờ (`setupBoardForGame:...`) để nhận biết ngay khi vào ván, đổi bên hoặc đảo chiều bàn cờ, sau đó phát thông báo cập nhật trạng thái phe.
-- **Đọc quyền & góc nhìn qua `BoardPositionDetector`:** Hàm `detectUserIsPlayingBlack` kiểm tra quyền đi (`allowUserToMakeWhiteMoves` / `allowUserToMakeBlackMoves`) trước; nếu cả hai đều mở (chế độ phân tích / Pass & Play) thì dựa vào `flipped` / `isFlipped` (`YES` là Đen, `NO` là Trắng).
-- **Áp dụng & ghi đè:** Dùng kết quả nhận diện để đối chiếu lượt đi (`isOurTurnForFEN`) và lật tọa độ vẽ trên `ArrowOverlay`, đồng thời giữ công tắc chọn tay để override khi test thế cờ.
 
 ### 1. Hook trực tiếp `CHBoardView` (lớp chính)
 
@@ -31,6 +26,12 @@ Bot của Chess.com khởi tạo nhiều instance `CHGame` tạm thời để t�
 
 * **`FENValidator`**: Kiểm tra cấu trúc hợp lệ (8 hàng, mỗi hàng đủ 8 ô, lượt đi `w` hoặc `b`) và chuẩn hóa chỉ giữ 4 trường đầu (vị trí quân, lượt đi, quyền nhập thành, en passant).
 * **Debounce & khử trùng**: Gom các FEN tới liên tục, chỉ phát FEN mới nhất sau `0.08s` và bỏ qua FEN trùng lặp.
+
+### Nhận diện màu quân (Trắng / Đen)
+
+- **Hook `CHBoardView` (`Tweak.xm`):** Hook `setFlipped:`, `setAllowUserToMakeBlackMoves:` và các method thiết lập ván cờ (`setupBoardForGame:...`) để nhận biết ngay khi vào ván, đổi bên hoặc đảo chiều bàn cờ, sau đó phát thông báo cập nhật trạng thái phe.
+- **Đọc quyền & góc nhìn qua `BoardPositionDetector`:** Hàm `detectUserIsPlayingBlack` kiểm tra quyền đi (`allowUserToMakeWhiteMoves` / `allowUserToMakeBlackMoves`) trước; nếu cả hai đều mở (chế độ phân tích / Pass & Play) thì dựa vào `flipped` / `isFlipped` (`YES` là Đen, `NO` là Trắng).
+- **Áp dụng & ghi đè:** Dùng kết quả nhận diện để đối chiếu lượt đi (`isOurTurnForFEN`) và lật tọa độ vẽ trên `ArrowOverlay`, đồng thời giữ công tắc chọn tay để override khi test thế cờ.
 
 ---
 
