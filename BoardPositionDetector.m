@@ -1,5 +1,6 @@
 #import "BoardPositionDetector.h"
 #import <objc/runtime.h>
+#import <objc/message.h>
 #import <os/lock.h>
 
 static os_unfair_lock gLock = OS_UNFAIR_LOCK_INIT;
@@ -163,6 +164,41 @@ static __weak UIView *gBoardView = nil;
     CGFloat cellH = frame.size.height / 8.0;
     if (flipped) return CGPointMake(frame.origin.x + (7 - file + 0.5) * cellW, frame.origin.y + (rank + 0.5) * cellH);
     return CGPointMake(frame.origin.x + (file + 0.5) * cellW, frame.origin.y + (7 - rank + 0.5) * cellH);
+}
+
+- (BOOL)detectUserIsPlayingBlack {
+    UIView *board = [self boardView];
+    if (!board || !board.window) {
+        board = [self detectBoardView];
+    }
+    if (!board) return NO;
+
+    @try {
+        // 1. Phân tích quyền đi nước (Online / Bot từ otool -tvV):
+        // allowUserToMakeWhiteMoves vs allowUserToMakeBlackMoves
+        BOOL hasWhiteSel = [board respondsToSelector:@selector(allowUserToMakeWhiteMoves)];
+        BOOL hasBlackSel = [board respondsToSelector:@selector(allowUserToMakeBlackMoves)];
+        if (hasWhiteSel && hasBlackSel) {
+            BOOL canWhite = ((BOOL (*)(id, SEL))objc_msgSend)(board, @selector(allowUserToMakeWhiteMoves));
+            BOOL canBlack = ((BOOL (*)(id, SEL))objc_msgSend)(board, @selector(allowUserToMakeBlackMoves));
+            if (canWhite && !canBlack) {
+                return NO; // Quân Trắng
+            }
+            if (!canWhite && canBlack) {
+                return YES; // Quân Đen
+            }
+        }
+
+        // 2. Phân tích góc nhìn lật bàn cờ (flipped / isFlipped)
+        if ([board respondsToSelector:@selector(flipped)]) {
+            return ((BOOL (*)(id, SEL))objc_msgSend)(board, @selector(flipped));
+        }
+        if ([board respondsToSelector:@selector(isFlipped)]) {
+            return ((BOOL (*)(id, SEL))objc_msgSend)(board, @selector(isFlipped));
+        }
+    } @catch (NSException *e) { }
+
+    return NO;
 }
 
 @end

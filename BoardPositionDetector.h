@@ -21,6 +21,10 @@
 // flipped = YES nếu đang chơi cầm quân đen (bàn bị lật).
 - (CGPoint)centerOfSquare:(NSString *)algebraicSquare flipped:(BOOL)flipped;
 
+// Tự động phân tích xem người dùng đang cầm quân Đen (YES) hay quân Trắng (NO)
+// dựa trên các thuộc tính otool phân tích được từ CHBoardView (allowUserToMake...Moves, flipped)
+- (BOOL)detectUserIsPlayingBlack;
+
 // Xoá board đã lưu (buộc rescan lần sau)
 - (void)reset;
 

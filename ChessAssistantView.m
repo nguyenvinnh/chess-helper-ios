@@ -4,6 +4,7 @@
 #import "ChessEngine/SuggestionPlanner.h"
 #import "ChessEngine/FENValidator.h"
 #import "ArrowOverlay.h"
+#import "BoardPositionDetector.h"
 #import <string.h>
 #import <mach-o/getsect.h>
 #import <mach-o/dyld.h>
@@ -547,8 +548,20 @@ static BOOL IsKingInCheck(NSString *fen, unichar color) {
 }
 
 - (void)sideToggleChanged:(UISwitch *)sender {
-    self.sideLabel.text = sender.isOn ? @"Đen" : @"Trắng";
+    self.sideLabel.text = sender.isOn ? @"Đen (Tay)" : @"Trắng (Tay)";
     [self saveSettings];
+    [self appendLog:[NSString stringWithFormat:@"[Side] Chuyển thủ công: Cầm quân %@", sender.isOn ? @"ĐEN" : @"TRẮNG"]];
+}
+
+- (void)updateUserSideIsBlack:(BOOL)isBlack autoDetected:(BOOL)autoDetected {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (self.sideSwitch.isOn != isBlack) {
+            [self.sideSwitch setOn:isBlack animated:YES];
+            [self saveSettings];
+            [self appendLog:[NSString stringWithFormat:@"[Side] Tự động nhận diện: Cầm quân %@", isBlack ? @"ĐEN" : @"TRẮNG"]];
+        }
+        self.sideLabel.text = isBlack ? @"Đen" : @"Trắng";
+    });
 }
 
 - (void)turnCheckChanged:(UISwitch *)sender {
@@ -829,6 +842,11 @@ static BOOL IsKingInCheck(NSString *fen, unichar color) {
 
 - (void)setDetectedFEN:(NSString *)fen {
     if (fen.length == 0) return;
+
+    // Tự động nhận diện bên người dùng (Trắng/Đen) từ CHBoardView dựa trên phân tích otool
+    BOOL detectedBlack = [[BoardPositionDetector shared] detectUserIsPlayingBlack];
+    [self updateUserSideIsBlack:detectedBlack autoDetected:YES];
+
     NSString *newNorm = [FENValidator normalizedFEN:fen];
     NSString *oldNorm = [FENValidator normalizedFEN:self.currentFEN];
     if (newNorm && oldNorm && [newNorm isEqualToString:oldNorm]) return;

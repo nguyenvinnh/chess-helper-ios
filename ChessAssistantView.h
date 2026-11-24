@@ -10,5 +10,6 @@
 - (void)setStatusText:(NSString *)text;
 - (void)appendLog:(NSString *)line;
 - (void)setMonitoringActive:(BOOL)active;
+- (void)updateUserSideIsBlack:(BOOL)isBlack autoDetected:(BOOL)autoDetected;
 
 @end
